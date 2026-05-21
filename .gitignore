@@ -1,0 +1,5 @@
+node_modules/
+packages/index-mcp-server/dist/
+*.log
+.bobbin/
+.DS_Store

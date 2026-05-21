@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "bobbin": {
+      "command": "npx",
+      "args": ["tsx", "${CLAUDE_PLUGIN_ROOT}/packages/index-mcp-server/src/index.ts"],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}",
+      "env": {
+        "BOBBIN_INDEX_DIR": ".bobbin/index"
+      }
+    }
+  }
+}

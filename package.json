@@ -1,0 +1,13 @@
+{
+  "name": "bobbin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local code intelligence for Cursor and Claude Code — symbol graph, callers/callees, impact analysis, BM25 search. Graph-first, not grep-first.",
+  "scripts": {
+    "build": "npm run build --workspace=@bobbin/index-mcp-server"
+  },
+  "workspaces": [
+    "packages/index-mcp-server"
+  ],
+  "license": "MIT"
+}

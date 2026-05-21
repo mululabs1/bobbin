@@ -1,0 +1,17 @@
+---
+description: Prefer Bobbin symbol graph tools before grep or codebase_search
+alwaysApply: true
+---
+
+# Bobbin — graph first
+
+When the **bobbin** MCP server is enabled:
+
+1. If you know a **symbol name** (function, class, method), call **`find_symbol`** or **`get_related_symbols`** first. They are local, fast, and show relationships.
+2. Call **`analyze_impact`** before editing existing symbols.
+3. Use **`codebase_search`** only when you do not know any symbol name (local BM25 over the index).
+4. Use **`grep`** only for literal strings (error messages, config keys, exact imports).
+5. If tools say the index is missing, call **`index_codebase`** once, then retry graph tools.
+6. When the user has files open, call **`set_open_files`** with those paths so ranking favors relevant code.
+
+Do not ask the user to index manually if you can call `index_codebase` yourself.

@@ -1,0 +1,20 @@
+{
+  "name": "bobbin",
+  "displayName": "Bobbin",
+  "version": "0.1.0",
+  "description": "Local code intelligence for Cursor: symbol graph, callers/callees, impact analysis, BM25 search. Graph-first, not grep-first.",
+  "license": "MIT",
+  "keywords": [
+    "indexing",
+    "symbol-graph",
+    "code-intelligence",
+    "codebase-search",
+    "mcp",
+    "tree-sitter"
+  ],
+  "category": "developer-tools",
+  "tags": ["indexing", "graph", "search", "local"],
+  "skills": "./skills/",
+  "rules": "./rules/",
+  "hooks": "./hooks/"
+}

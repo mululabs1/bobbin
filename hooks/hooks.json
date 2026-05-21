@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "FileChanged": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/packages/index-mcp-server/scripts/reindex-hook.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/packages/index-mcp-server/scripts/open-files-hint.mjs\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}
