@@ -2,8 +2,10 @@
   "mcpServers": {
     "bobbin": {
       "command": "npx",
-      "args": ["tsx", "${CLAUDE_PLUGIN_ROOT}/packages/index-mcp-server/src/index.ts"],
-      "cwd": "${CLAUDE_PLUGIN_ROOT}",
+      "args": [
+        "tsx",
+        "${CLAUDE_PLUGIN_ROOT}/packages/index-mcp-server/src/index.ts"
+      ],
       "env": {
         "BOBBIN_INDEX_DIR": ".bobbin/index"
       }

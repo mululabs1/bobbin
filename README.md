@@ -4,14 +4,6 @@
 
 Bobbin gives your AI agent a real index of your codebase. Instead of `grep`ing through thousands of files, the agent asks the symbol graph: *who calls this function? what does it depend on? what breaks if I change it?* — and gets a precise answer in milliseconds.
 
-```bash
-git clone https://github.com/mululabs1/bobbin.git
-cd bobbin
-npm install
-```
-
-Then install for your editor (below). On first run, ask the agent to `index_codebase` — Bobbin writes a symbol graph to `.bobbin/index/` and uses it for every subsequent query.
-
 ---
 
 ## Why
@@ -30,30 +22,53 @@ Same model. Same task. Roughly 10× fewer tool calls and dramatically less conte
 
 ## Install
 
-Bobbin is a single plugin that ships configurations for both Cursor and Claude Code.
+### Prerequisites
+
+- **Node.js 20+**
+- You must `npm install` inside the cloned repo before either editor will launch the MCP server. `npx tsx` can fetch its own loader on demand, but Bobbin's runtime deps (`@modelcontextprotocol/sdk`, `fast-glob`, `zod`) need to be on disk.
 
 ### Cursor
 
-1. Clone Bobbin somewhere (e.g. `~/.cursor/plugins/local/bobbin`):
+The bundled `mcp.json` assumes the plugin is cloned into Cursor's documented local-plugin location (`~/.cursor/plugins/local/bobbin`). If you clone somewhere else, edit the path in `mcp.json` to match.
 
-   ```bash
-   git clone https://github.com/mululabs1/bobbin.git ~/.cursor/plugins/local/bobbin
-   cd ~/.cursor/plugins/local/bobbin
-   npm install
-   ```
+```bash
+git clone https://github.com/mululabs1/bobbin.git ~/.cursor/plugins/local/bobbin
+cd ~/.cursor/plugins/local/bobbin
+npm install
+```
 
-2. In Cursor: **Settings → MCP** (or Plugins) and enable **bobbin**.
-3. Open a project, then ask the agent to run **`index_codebase`** once.
+Then in Cursor: **Settings → Plugins**, enable **Bobbin**, restart Cursor (or `Developer: Reload Window`), open a project, and ask the agent to run **`index_codebase`**.
+
+If Cursor doesn't see the plugin, you can wire the MCP server in directly. Edit `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "bobbin": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/absolute/path/to/bobbin/packages/index-mcp-server/src/index.ts"
+      ]
+    }
+  }
+}
+```
 
 ### Claude Code
 
-Add Bobbin as an MCP server. From any project:
+Clone Bobbin anywhere, install deps, and add the MCP server.
 
 ```bash
-claude mcp add bobbin -- npx tsx /absolute/path/to/bobbin/packages/index-mcp-server/src/index.ts
+git clone https://github.com/mululabs1/bobbin.git
+cd bobbin
+npm install
+claude mcp add bobbin -- npx tsx "$(pwd)/packages/index-mcp-server/src/index.ts"
 ```
 
-Or, if you've cloned Bobbin into the project itself, the bundled `.mcp.json` is picked up automatically. Restart Claude Code, then ask the agent to run **`index_codebase`** once.
+Or, for the full plugin (with the bobbin-index skill, the graph-first rule, and hooks): install Bobbin as a plugin via Claude Code's plugin system. The bundled `.claude-plugin/plugin.json` and `.mcp.json` use `${CLAUDE_PLUGIN_ROOT}`, which Claude Code expands automatically when it loads a plugin folder.
+
+Restart Claude Code, open a project, and ask the agent to run **`index_codebase`**.
 
 ### What gets created
 
@@ -111,12 +126,12 @@ Bobbin's indexer extracts symbols via language-specific patterns. Out of the box
 
 | Language | Extracted |
 |---|---|
-| TypeScript / JavaScript (.ts, .tsx, .js, .jsx, .mts, .mjs, .cts, .cjs) | functions, classes, methods, interfaces, types, enums |
-| Python (.py) | functions, methods, classes |
-| Go (.go) | functions, methods, structs, interfaces |
-| Rust (.rs) | fn, struct, trait, enum, impl methods |
-| Java (.java) | classes, interfaces, methods |
-| Ruby (.rb) | classes, modules, methods |
+| TypeScript / JavaScript (`.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.mjs`, `.cts`, `.cjs`) | functions, classes, methods, interfaces, types, enums |
+| Python (`.py`) | functions, methods, classes |
+| Go (`.go`) | functions, methods, structs, interfaces |
+| Rust (`.rs`) | fn, struct, trait, enum, impl methods |
+| Java (`.java`) | classes, interfaces, methods |
+| Ruby (`.rb`) | classes, modules, methods |
 
 Callers and callees are inferred by scanning each symbol's body for identifiers that match other known symbols in the graph. This is a v0.1 heuristic — accurate for unique names, conservative for common ones (e.g. `get`, `run`). Tree-sitter-based parsing is on the roadmap for v0.2.
 
@@ -128,7 +143,7 @@ Bobbin reads a small set of environment variables:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `BOBBIN_WORKSPACE_ROOT` | Project root the MCP server operates against | Editor CWD or `$PWD` |
+| `BOBBIN_WORKSPACE_ROOT` | Project root the MCP server operates against | Editor-set `CURSOR_WORKSPACE` / `CLAUDE_WORKSPACE`, else `$PWD` |
 | `BOBBIN_INDEX_DIR` | Where the index is written, relative to project root | `.bobbin/index` |
 | `BOBBIN_OPEN_FILES` | Comma-separated list of files the user has open | unset |
 
@@ -141,6 +156,14 @@ You generally don't need to set any of these — the defaults work out of the bo
 - **Not a vector database.** No embeddings, no Chroma, no Qdrant, no cloud. Bobbin uses BM25 over chunks and a symbol graph derived from regex parsing.
 - **Not a hosted service.** Everything runs in your editor's MCP process.
 - **Not a replacement for tree-sitter / LSP.** The v0.1 indexer is regex-based. It's accurate enough for most callers/callees questions but it isn't a real compiler frontend.
+
+---
+
+## Known issues (v0.1)
+
+- Multi-line function signatures (a `function foo(` with `)` and `{` on later lines) get a slightly-too-narrow `endLine`. Symbols are still extracted correctly; only the recorded range is short. Fixed by the tree-sitter rewrite landing in v0.2.
+- `npx tsx` requires `npm install` to have run first — `tsx` itself loads on demand, but Bobbin's own deps (`@modelcontextprotocol/sdk`, `fast-glob`, `zod`) need to be on disk.
+- If Cursor doesn't pick up `.cursor-plugin/plugin.json` automatically, fall back to editing `~/.cursor/mcp.json` directly (snippet above).
 
 ---
 

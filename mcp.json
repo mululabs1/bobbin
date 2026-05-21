@@ -2,8 +2,10 @@
   "mcpServers": {
     "bobbin": {
       "command": "npx",
-      "args": ["tsx", "${CURSOR_PLUGIN_ROOT}/packages/index-mcp-server/src/index.ts"],
-      "cwd": "${CURSOR_PLUGIN_ROOT}",
+      "args": [
+        "tsx",
+        "${userHome}/.cursor/plugins/local/bobbin/packages/index-mcp-server/src/index.ts"
+      ],
       "env": {
         "BOBBIN_INDEX_DIR": ".bobbin/index"
       }
